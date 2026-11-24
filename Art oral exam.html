@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="ga">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scrúdú Béil · IRS146 · Ullmhú</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,400;1,600&family=Crimson+Pro:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0f; --card: #111115; --card-border: #1e1e24;
+    --text: #e2ddd4; --muted: #8a8580; --dim: #555;
+    --gold: #c9a84c; --gold-dark: #8b6914;
+    --green: #4ade80; --green-bg: #0a2118; --green-border: #1a4a2e;
+    --red: #f87171; --red-bg: #200e0e; --red-border: #4a1a1a;
+    --english-bg: #18181e; --english-border: #28282e;
+  }
+  html, body { background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Georgia, serif; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+  body { display: flex; flex-direction: column; align-items: center; padding: 2rem 1rem 4rem; font-size: 17px; line-height: 1.5; }
+  i { color: #d8cfae; }
+  b { color: var(--text); font-weight: 600; }
+
+  /* HEADER */
+  .header { text-align: center; margin-bottom: 1.4rem; max-width: 680px; width: 100%; }
+  .header-eyebrow { font-size: 0.65rem; letter-spacing: 0.25em; color: var(--muted); text-transform: uppercase; margin-bottom: 0.5rem; }
+  .header h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.7rem, 6vw, 2.5rem); font-weight: 600; line-height: 1.1; }
+  .header-rule { width: 50px; height: 1.5px; background: linear-gradient(90deg, transparent, var(--gold-dark), transparent); margin: 0.8rem auto; }
+  .header p { font-size: 0.95rem; color: var(--muted); font-style: italic; }
+
+  .scorebar { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.2rem; font-size: 0.88rem; color: var(--muted); margin-bottom: 1.2rem; }
+  .scorebar strong { color: var(--text); }
+  .scorebar .ok strong { color: var(--green); }
+  .scorebar .no strong { color: var(--red); }
+
+  /* TABS */
+  .tabs { display: flex; gap: 0.35rem; overflow-x: auto; max-width: 680px; width: 100%; padding-bottom: 0.4rem; margin-bottom: 1.4rem; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { flex: 0 0 auto; padding: 0.45rem 0.95rem; border-radius: 2rem; border: 1px solid #2a2a2a; background: transparent; color: var(--muted); font-family: 'Crimson Pro', serif; font-size: 0.85rem; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .tab.active { background: var(--gold-dark); color: #f5efe0; border-color: var(--gold-dark); font-weight: 600; }
+  .panel { max-width: 680px; width: 100%; display: none; }
+  .panel.active { display: block; animation: fadeUp 0.25s ease forwards; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* CHIPS */
+  .toolbar { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.3rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .chip { padding: 0.25rem 0.75rem; border-radius: 2rem; font-size: 0.75rem; font-family: 'Crimson Pro', serif; background: transparent; color: var(--muted); border: 1px solid #2a2a2a; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .chip.active { background: var(--gold); color: #0d0d0f; border-color: var(--gold); font-weight: 600; }
+  .chip.sm { font-size: 0.7rem; }
+  .chip .cnt { opacity: 0.7; margin-left: 0.25rem; }
+  .chip-label { font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); margin-right: 0.3rem; align-self: center; }
+
+  /* GROUPS + NOTES */
+  .group { margin-bottom: 2.2rem; }
+  .group h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; color: var(--gold); font-weight: 600; margin-bottom: 0.1rem; }
+  .group .sub { font-style: italic; color: var(--muted); font-size: 0.92rem; margin-bottom: 0.8rem; }
+  .note { background: var(--card); border: 1px solid var(--card-border); border-left: 3px solid var(--gold-dark); border-radius: 0.7rem; padding: 1rem 1.1rem; margin-bottom: 1rem; }
+  .note-ga { font-family: 'Cormorant Garamond', serif; font-size: 1.12rem; font-style: italic; margin-bottom: 0.6rem; }
+  .note-en { background: var(--english-bg); border: 1px solid var(--english-border); border-radius: 0.5rem; padding: 0.6rem 0.8rem; font-size: 0.92rem; color: #c8c3ba; }
+  .note-extra { font-size: 0.9rem; color: #c8c3ba; margin-top: 0.7rem; }
+  .lbl { font-size: 0.58rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim); display: block; margin-bottom: 0.2rem; font-style: normal; }
+  table.gt { width: 100%; border-collapse: collapse; margin-top: 0.8rem; font-size: 0.86rem; }
+  table.gt th { text-align: left; color: var(--gold); font-weight: 600; border-bottom: 1px solid #2a2a2a; padding: 0.35rem 0.4rem; font-size: 0.75rem; letter-spacing: 0.05em; }
+  table.gt td { border-bottom: 1px solid #1a1a1f; padding: 0.4rem; vertical-align: top; color: #cfcac1; }
+  table.gt td:first-child { color: var(--text); white-space: nowrap; }
+  .tablewrap { overflow-x: auto; }
+
+  /* QUESTION CARD */
+  .qcard { background: var(--card); border: 1px solid var(--card-border); border-left: 3px solid #2a2a30; border-radius: 0.8rem; padding: 1rem 1.1rem; margin-bottom: 0.7rem; }
+  .qcard.st-ok { border-left-color: var(--green-border); }
+  .qcard.st-no { border-left-color: var(--red); }
+  .qtop { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 0.4rem; }
+  .qtop:empty { display: none; }
+  #t-card .qtop { justify-content: space-between; }
+  .badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 1rem; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; background: #1a1a20; color: var(--muted); }
+  .st { font-size: 0.7rem; color: var(--dim); }
+  .st.ok { color: var(--green); } .st.no { color: var(--red); }
+  .english-box { background: var(--english-bg); border: 1px solid var(--english-border); border-radius: 0.5rem; padding: 0.55rem 0.8rem; margin-bottom: 0.6rem; }
+  .english-text { font-size: 0.93rem; color: #bbb; font-style: italic; }
+  .irish-question { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.15rem, 4vw, 1.4rem); font-style: italic; line-height: 1.4; margin-bottom: 0.7rem; }
+  .story { background: #15151a; border: 1px solid #222228; border-radius: 0.55rem; padding: 0.7rem 0.85rem; margin-bottom: 0.7rem; font-size: 0.93rem; color: #cfcac1; }
+  .story-title { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; color: var(--gold); font-weight: 600; margin-bottom: 0.25rem; }
+  .reveal-btn { background: transparent; border: 1px solid var(--gold-dark); color: var(--gold); border-radius: 0.45rem; padding: 0.4rem 0.9rem; font-family: 'Crimson Pro', serif; font-size: 0.85rem; cursor: pointer; }
+  .reveal-btn:active { opacity: 0.75; }
+  .answer { margin-top: 0.7rem; padding: 0.75rem 0.9rem; background: rgba(201,168,76,0.06); border-left: 3px solid var(--gold-dark); border-radius: 0 0.5rem 0.5rem 0; animation: fadeUp 0.2s ease forwards; }
+  .ans-main { font-family: 'Cormorant Garamond', serif; font-size: 1.12rem; font-style: italic; color: var(--text); }
+  .ans-en { font-size: 0.95rem; color: #ddd6c6; margin-bottom: 0.4rem; }
+  .ans-note { font-size: 0.85rem; color: #9a958c; margin-top: 0.4rem; }
+  .src { font-size: 0.75rem; color: var(--dim); margin-top: 0.4rem; font-style: italic; }
+  ol.ways { margin: 0.2rem 0 0 1.3rem; font-family: 'Cormorant Garamond', serif; font-size: 1.12rem; font-style: italic; }
+  ol.ways li { margin-bottom: 0.15rem; }
+  .mark-row { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
+  .mark { flex: 1; min-width: 130px; border-radius: 0.45rem; padding: 0.45rem; font-family: 'Crimson Pro', serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+  .mark.ok { background: var(--green-bg); border: 1px solid var(--green-border); color: var(--green); }
+  .mark.no { background: var(--red-bg); border: 1px solid var(--red-border); color: var(--red); }
+  .mark.chosen { outline: 2px solid currentColor; }
+  .hidden { display: none !important; }
+  .empty { color: var(--dim); font-style: italic; font-size: 0.9rem; }
+
+  /* FLASHCARDS */
+  .flash-wrap { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; }
+  .flash { width: 100%; min-height: 210px; background: var(--card); border: 1px solid var(--card-border); border-radius: 1.1rem; padding: 1.6rem 1.3rem; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
+  .flash.back { border-color: var(--gold-dark); }
+  .flash .f-main { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.5rem, 6vw, 2.1rem); font-style: italic; line-height: 1.25; }
+  .flash .f-note { font-size: 0.88rem; color: #9a958c; margin-top: 0.8rem; max-width: 460px; }
+  .flash .f-hint { font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); margin-top: 1rem; }
+  .flash-ctrl { display: flex; gap: 0.4rem; flex-wrap: wrap; justify-content: center; }
+  .btn { background: #16161a; border: 1px solid #2a2a2a; border-radius: 0.5rem; padding: 0.5rem 0.9rem; color: var(--gold); font-family: 'Crimson Pro', serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+  .btn:active { opacity: 0.75; }
+  .btn.primary { background: var(--gold-dark); color: #f5efe0; border-color: var(--gold-dark); }
+  .counter { font-size: 0.85rem; color: var(--muted); }
+
+  /* TRIAIL */
+  .input-row { display: flex; gap: 0.5rem; margin-top: 0.3rem; }
+  .answer-input { flex: 1; min-width: 0; background: var(--bg); border: 1px solid #2a2a2a; border-radius: 0.5rem; padding: 0.6rem 0.85rem; color: var(--text); font-family: 'Crimson Pro', serif; font-size: 1rem; -webkit-appearance: none; }
+  .answer-input:focus { outline: none; border-color: var(--gold-dark); }
+  .result-box { border-radius: 0.6rem; padding: 0.85rem 1rem; margin-top: 0.8rem; animation: fadeUp 0.2s ease forwards; }
+  .result-box.correct { background: var(--green-bg); border: 1px solid var(--green-border); }
+  .result-box.wrong { background: var(--red-bg); border: 1px solid var(--red-border); }
+  .result-label { font-weight: 600; margin-bottom: 0.25rem; }
+  .result-box.correct .result-label { color: var(--green); }
+  .result-box.wrong .result-label { color: var(--red); }
+  .linkbtn { background: none; border: none; color: var(--muted); font-family: 'Crimson Pro', serif; font-size: 0.82rem; text-decoration: underline; cursor: pointer; margin-top: 0.5rem; }
+  .next-btn { width: 100%; margin-top: 0.8rem; background: #16161a; border: 1px solid #2a2a2a; border-radius: 0.5rem; padding: 0.6rem; color: var(--gold); font-family: 'Crimson Pro', serif; font-size: 0.92rem; font-weight: 600; cursor: pointer; }
+  .progress-track { height: 2px; background: #1a1a1a; border-radius: 2px; overflow: hidden; margin-top: 1rem; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #5c420a, var(--gold-dark), var(--gold)); transition: width 0.4s ease; }
+  .finish { text-align: center; padding: 2rem 1rem; background: var(--card); border: 1px solid var(--card-border); border-radius: 1.1rem; }
+  .finish-pct { font-family: 'Cormorant Garamond', serif; font-size: 3.6rem; font-weight: 600; color: var(--gold); line-height: 1; }
+  .finish-sub { color: var(--muted); margin: 0.5rem 0 1.4rem; }
+
+  /* TREOIR */
+  .guide h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; color: var(--gold); margin: 1.2rem 0 0.4rem; }
+  .guide p, .guide li { font-size: 0.97rem; color: #d3cdc2; }
+  .guide ol, .guide ul { margin-left: 1.3rem; }
+  .guide li { margin-bottom: 0.35rem; }
+  .guide .ga { font-family: 'Cormorant Garamond', serif; font-style: italic; color: var(--text); font-size: 1.05rem; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.5rem; margin-top: 0.6rem; }
+  .stat { background: var(--card); border: 1px solid var(--card-border); border-radius: 0.6rem; padding: 0.6rem; text-align: center; font-size: 0.8rem; color: var(--muted); }
+  .stat strong { display: block; font-family: 'Cormorant Garamond', serif; font-size: 1.5rem; color: var(--text); }
+  .reset { margin-top: 1.5rem; }
+
+  /* BÉIL EXTRAS */
+  .qcard.model { border-left-color: var(--gold-dark); }
+  .timer { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 0.2rem 0 0.9rem; }
+  .t-clock { font-family: 'Cormorant Garamond', serif; font-size: 2.1rem; font-weight: 600; color: var(--gold); min-width: 4.4rem; font-variant-numeric: tabular-nums; line-height: 1; }
+  .t-clock.done { color: var(--red); }
+  .t-hint { font-size: 0.8rem; color: var(--dim); font-style: italic; flex-basis: 100%; }
+  .msteps { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 1rem; }
+  .mstep { font-size: 0.7rem; padding: 0.15rem 0.65rem; border-radius: 1rem; border: 1px solid #2a2a2a; color: var(--dim); }
+  .mstep.on { border-color: var(--gold); color: var(--gold); font-weight: 600; }
+  .mstep.past { color: var(--muted); }
+  .mock-nav { display: flex; justify-content: space-between; gap: 0.5rem; margin-top: 1rem; }
+  ul.pts { margin: 0.2rem 0 0.4rem 1.2rem; font-size: 0.93rem; color: #d3cdc2; }
+  ul.pts li { margin-bottom: 0.25rem; }
+  table.gt td:first-child { white-space: normal; min-width: 4.6em; }
+  .guide .ask li { margin-bottom: 0.6rem; }
+  .guide .ask .en { display: block; font-size: 0.85rem; color: var(--muted); font-style: italic; }
+  .panel-intro { margin-bottom: 1.1rem; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-eyebrow">IRS146 · Léamh na Gaeilge · Scrúdú Béil</div>
+  <h1>Ullmhú don Scrúdú Béil</h1>
+  <div class="header-rule"></div>
+  <p>De hÍde, na téamaí, léamh Caisleáin Óir agus míniú ar dhá dhóigh · oral exam practice</p>
+</div>
+
+<div class="scorebar">
+  <span class="ok">Ar eolas <strong id="sb-ok">0</strong></span>
+  <span class="no">Le hathbhreithniú <strong id="sb-no">0</strong></span>
+  <span>Iomlán <strong id="sb-total">0</strong></span>
+</div>
+
+<nav class="tabs" id="tabs"></nav>
+
+<!-- TREOIR -->
+<div class="panel guide" id="p-treoir">
+  <h3>An scrúdú · What the exam looks like</h3>
+  <p>From the notes you copied off the board:</p>
+  <div class="tablewrap"><table class="gt">
+    <tr><th>Cuid</th><th>Ceist</th><th>Tab</th></tr>
+    <tr><td>Ceist 1 · 10%</td><td class="ga">Cérbh é Dubhghlas de hÍde?</td><td>Ceist 1</td></tr>
+    <tr><td>Ceist 2 · 10%</td><td class="ga">Na téamaí sa léacht</td><td>Ceist 2</td></tr>
+    <tr><td>Ceist 3 · 10%</td><td class="ga">Sliocht as Caisleáin Óir a léamh os ard</td><td>Ceist 3</td></tr>
+    <tr><td>Ceist 4 · 10%</td><td class="ga">5 focal/frása a mhíniú ar dhá dhóigh eile</td><td>Ceist 4</td></tr>
+  </table></div>
+  <p style="margin-top:0.7rem">That adds up to 40%, but the handbook says the oral is worth <b>50%</b> and also mentions discussing the background of the book and the author. Your practice sheet gives <i>“Cuir síos ar chúlra an údair”</i> 20 marks and the míniú questions 15. So the <b>Ó Grianna</b> tab covers the likely extra part. Ask Art to confirm.</p>
+
+  <h3>Ceisteanna d’Art · Questions to ask Art</h3>
+  <ol class="ask">
+    <li><span class="ga">Cad é mar atá an 50% roinnte idir na ceisteanna?</span><span class="en">How is the 50% split between the questions?</span></li>
+    <li><span class="ga">An mbeidh ceist ann faoi Shéamus Ó Grianna agus faoi chúlra Caisleáin Óir?</span><span class="en">Will there be a question on Ó Grianna and the book’s background?</span></li>
+    <li><span class="ga">An mbeidh na focail le míniú as Caisleáin Óir amháin, nó as téacs de hÍde fosta?</span><span class="en">Will the míniú phrases come from Caisleáin Óir only, or from the Hyde text too?</span></li>
+    <li><span class="ga">An dtig linn ár mbileog féin a thabhairt isteach?</span><span class="en">Can we bring our own sheet (with our pencil marks) in?</span></li>
+    <li><span class="ga">Cá fhad a mhairfidh an scrúdú?</span><span class="en">How long will the exam last?</span></li>
+  </ol>
+
+  <h3>Conas cleachtadh · How to practise</h3>
+  <ol>
+    <li><span class="ga">Abair os ard é.</span> Say every answer out loud before you reveal it. Reading silently doesn’t prepare you for speaking.</li>
+    <li><span class="ga">Taifead thú féin.</span> Record yourself on your phone and listen back, especially for séimhiú and urú.</li>
+    <li><span class="ga">Marcáil go hionraic.</span> <i>✓ Bhí mé ceart</i> or <i>✗ Ní raibh</i>. Use <b>Le hathbhreithniú</b> to redo only what you got wrong.</li>
+    <li><span class="ga">Bíodh tuairim agat.</span> Have one opinion sentence ready for each question. Examiners often ask a follow-up.</li>
+    <li><span class="ga">Scrúdú bréige.</span> In the last few days, do one full practice run a day.</li>
+  </ol>
+
+  <h3>Plean · A five-day plan</h3>
+  <ul>
+    <li><b>Lá 1</b> – Ceist 1 (facts, questions, model answer) · Ceist 3: read Samples 1–2 aloud + their words</li>
+    <li><b>Lá 2</b> – Ceist 2 (themes + follow-ups) · Ceist 3: Samples 3–5</li>
+    <li><b>Lá 3</b> – Ceist 4: Caisleáin Óir 1–5 · Malairtí úsáideacha</li>
+    <li><b>Lá 4</b> – Ó Grianna · Frásaí cainte · Ceist 4: De hÍde 1–4</li>
+    <li><b>Lá 5</b> – Scrúdú bréige twice · then everything marked ✗</li>
+  </ul>
+
+  <h3>Nótaí · Notes</h3>
+  <ul>
+    <li>The Irish is <b>everyday Ulster Irish</b> to match your class (<i>amharc, fosta, thig liom</i>). The Caighdeán form is given where it differs.</li>
+    <li>The reading passages aren’t copied here because this is a public page. Keep your <i>scrúdú ceisteanna</i> sheet beside you.</li>
+    <li>Ó Grianna facts come from the <i>Dictionary of Irish Biography</i> (Ó Corráin 2009); the summary of <i>Caisleáin Óir</i> is based on the Mercier Press description. Check both against your own reading.</li>
+    <li>Hyde facts come from your own sources: Maume (2023), ainm.ie, Caerwyn Williams &amp; Ní Mhuiríosa (1979), Hughes (2012a, b) and the Field Day extract (Deane 1991).</li>
+    <li>For grammar and the essay vocab, use your other page, <i>hyde.html</i>. Progress here is saved in this browser on this device.</li>
+  </ul>
+
+  <h3>Achoimre · What’s in here</h3>
+  <div class="stats" id="stats"></div>
+  <button class="btn reset" id="reset-btn">Glan an dul chun cinn · Reset progress</button>
+</div>
+
+<div class="panel" id="p-c1">
+  <div class="note panel-intro"><div class="note-ga">Ceist 1: Cérbh é Dubhghlas de hÍde?</div><div class="note-en"><span class="lbl">10%</span>Learn the facts, answer the short questions, then work up to the model answer. Don’t learn the model word for word – learn the facts and the verbs, so it sounds like you talking.</div></div>
+  <div class="toolbar"><div class="chips" id="chips-c1"></div><div class="chips" id="stchips-c1"></div></div>
+  <div id="list-c1"></div>
+</div>
+<div class="panel" id="p-c2">
+  <div class="note panel-intro"><div class="note-ga">Ceist 2: Labhair faoi na téamaí sa léacht.</div><div class="note-en"><span class="lbl">10%</span>The four themes match the essay. The follow-up questions at the end (opinion, influence, link to Caisleáin Óir) are the ones an examiner is most likely to add.</div></div>
+  <div class="toolbar"><div class="chips" id="chips-c2"></div><div class="chips" id="stchips-c2"></div></div>
+  <div id="list-c2"></div>
+</div>
+<div class="panel" id="p-c3">
+  <div class="note panel-intro"><div class="note-ga">Ceist 3: Léigh sliocht as Caisleáin Óir os ard.</div><div class="note-en"><span class="lbl">10%</span>The five samples are on your <i>scrúdú ceisteanna</i> sheet (they aren’t copied here). Use this tab for the sounds and the words you need to know in each sample.</div></div>
+  <div class="toolbar"><div class="chips" id="chips-c3"></div><div class="chips" id="stchips-c3"></div></div>
+  <div id="list-c3"></div>
+</div>
+<div class="panel" id="p-c4">
+  <div class="note panel-intro">
+    <div class="note-ga">Mínigh na focail agus na frásaí seo ar dhá dhóigh eile i nGaeilge.</div>
+    <div class="note-en"><span class="lbl">Ceist 4 · 10%</span>Read the passage on your sheet first. For each phrase, say <b>two</b> other ways out loud, then reveal. Three ways to build an alternative: (1) swap in another word – <i>anallód → fadó</i>; (2) change the structure – <i>is gráin linn í → tá fuath againn uirthi</i>; (3) say it in plain words – <i>idir dhá thine Bhealtaine → i bponc</i>. My versions are one option each: any correct, natural alternative counts. The handy swaps are at the end.</div>
+  </div>
+  <div class="toolbar"><div class="chips" id="chips-c4"></div><div class="chips" id="stchips-c4"></div></div>
+  <div id="list-c4"></div>
+</div>
+<div class="panel" id="p-og">
+  <div class="toolbar"><div class="chips" id="chips-og"></div><div class="chips" id="stchips-og"></div></div>
+  <div id="list-og"></div>
+</div>
+<div class="panel" id="p-fr">
+  <div class="toolbar"><div class="chips" id="chips-fr"></div><div class="chips" id="stchips-fr"></div></div>
+  <div id="list-fr"></div>
+</div>
+
+<!-- SCRÚDÚ BRÉIGE -->
+<div class="panel" id="p-mock">
+  <div class="msteps" id="mock-steps"></div>
+  <div id="mock-body"></div>
+</div>
+
+<script>
+// ───────── SCRÚDÚ BÉIL · DATA ─────────
+// groups: c = title, sub, ga/en = note, table, extra; items: q (Irish), qen (English prompt), a (answer), n (note), src
+const SECS = {
+
+// ─── CEIST 1 ───
+c1: [
+ {c:"Fíricí: Dubhghlas de hÍde", sub:"Key facts in order – learn the verbs",
+  ga:"Labhair ar feadh dhá nóiméad nó mar sin. Úsáid an aimsir chaite agus an saorbhriathar: rugadh, tógadh, bunaíodh, toghadh.",
+  en:"You don’t need every date. Aim for six or seven facts in the right order, each in a short past-tense sentence. The table gives you the facts and the verb to hang each one on.",
+  table:[["Bliain","Fíric","Briathar"],
+   ["1860","Rugadh é sa Chaisleán Riabhach, Contae Ros Comáin.","rugadh"],
+   ["—","Ba mhinistir in Eaglais na hÉireann a athair; d’fhás sé aníos i nDún Gar.","bhí / d’fhás"],
+   ["—","D’fhoghlaim sé Gaeilge ó na seandaoine sa cheantar, ní ar scoil.","d’fhoghlaim"],
+   ["—","Chuaigh sé go Coláiste na Tríonóide.","chuaigh"],
+   ["—","Scríobh sé filíocht faoin ainm cleite ‘An Craoibhín Aoibhinn’.","scríobh"],
+   ["1892","Thug sé an léacht ‘The Necessity for De-Anglicising Ireland’.","thug"],
+   ["1893","Bunaíodh Conradh na Gaeilge; toghadh é mar uachtarán.","bunaíodh / toghadh"],
+   ["1901","Léiríodh a dhráma Casadh an tSúgáin.","léiríodh"],
+   ["1915","D’éirigh sé as an Chonradh.","d’éirigh sé as"],
+   ["1938–45","Ba é an chéad Uachtarán ar Éirinn é.","ba é"],
+   ["1949","Fuair sé bás.","fuair sé bás"]],
+  extra:"Sources: Maume (2023), ainm.ie, Caerwyn Williams & Ní Mhuiríosa (1979).",
+  items:[
+   {q:"Cá háit agus cá huair ar rugadh de hÍde?", qen:"Where and when was Hyde born?", a:"Rugadh é sa Chaisleán Riabhach, i gContae Ros Comáin, sa bhliain 1860 (ocht déag seasca)."},
+   {q:"Cén obair a bhí ag a athair?", qen:"What was his father’s job?", a:"Bhí sé ina mhinistir in Eaglais na hÉireann.", n:"So the family was Protestant: Protastúnaigh a bhí iontu."},
+   {q:"Cad é mar a d’fhoghlaim sé Gaeilge?", qen:"How did he learn Irish?", a:"Ó na seandaoine sa cheantar thart ar Dhún Gar, ní ar scoil."},
+   {q:"Cá ndeachaigh sé ar an ollscoil?", qen:"Where did he go to university?", a:"Go Coláiste na Tríonóide i mBaile Átha Cliath."},
+   {q:"Cén t-ainm cleite a bhí air, agus cad is ciall dó?", qen:"What was his pen name and what does it mean?", a:"An Craoibhín Aoibhinn – ‘the pleasant little branch’."},
+   {q:"Cad é Conradh na Gaeilge?", qen:"What is the Gaelic League?", a:"Eagraíocht a bunaíodh sa bhliain 1893 leis an Ghaeilge a choinneáil beo agus a athbheochan. Ba é de hÍde an chéad uachtarán."},
+   {q:"Cén dráma leis a bhí ar an chéad dráma Gaeilge in amharclann?", qen:"Which play of his was the first Irish play staged in a theatre?", a:"Casadh an tSúgáin (1901). Bhí de hÍde féin ag aisteoireacht ann."},
+   {q:"Cén fáth ar éirigh sé as an Chonradh sa bhliain 1915?", qen:"Why did he resign from the League in 1915?", a:"Ghlac an Conradh le cuspóirí polaitiúla, agus bhí seisean ag iarraidh fanacht amach ón pholaitíocht."},
+   {q:"Cén post a bhí aige ó 1938 go 1945?", qen:"What position did he hold from 1938 to 1945?", a:"Ba é an chéad Uachtarán ar Éirinn é."},
+   {q:"Cad é do bharúil féin faoi Dhubhghlas de hÍde?", qen:"Follow-up: what’s your own opinion of him?", a:"Sílim gur duine an-tábhachtach a bhí ann. Cé gur Protastúnach é a d’fhoghlaim an Ghaeilge mar dhara teanga, rinne sé níos mó ar son na teanga ná duine ar bith eile ag an am.", n:"Have one opinion sentence ready for every question – examiners often ask a follow-up."},
+   {model:true, q:"Freagra samplach: Cérbh é Dubhghlas de hÍde?", qen:"Model answer – read it twice, then say it without looking.", a:"Rugadh Dubhghlas de hÍde sa bhliain 1860 i gContae Ros Comáin. Bhí a athair ina mhinistir in Eaglais na hÉireann. D’fhoghlaim sé Gaeilge ó na seandaoine sa cheantar, ní ar scoil. Chuaigh sé go Coláiste na Tríonóide. Scríobh sé filíocht faoin ainm cleite ‘An Craoibhín Aoibhinn’, agus bhailigh sé amhráin agus scéalta ó na daoine. Sa bhliain 1892 thug sé léacht cháiliúil, ‘The Necessity for De-Anglicising Ireland’. Bunaíodh Conradh na Gaeilge sa bhliain 1893 agus ba é de hÍde an chéad uachtarán. Scríobh sé drámaí fosta, mar shampla Casadh an tSúgáin. D’éirigh sé as an Chonradh sa bhliain 1915, agus ba é an chéad Uachtarán ar Éirinn é ó 1938 go 1945. Fuair sé bás sa bhliain 1949."}
+  ]}
+],
+
+// ─── CEIST 2 ───
+c2: [
+ {c:"Na ceithre théama", sub:"The four themes – one or two sentences each",
+  ga:"Ceithre théama: (1) idir dhá thine Bhealtaine, (2) an leanúnachas, (3) an teanga, (4) an plean.",
+  en:"Learn one short sentence for each theme plus one example or quote. Then add your own opinion at the end. If Art’s list of four is different, keep the content and change the labels.",
+  table:[["Téama","Abairt amháin","Sampla / luachan"],
+   ["1. Idir dhá thine Bhealtaine","Bhí fuath acu ar Shasana, ach rinne siad aithris uirthi.","“dream dí-Ghaelaithe … ach gan iad bheith Gallda”"],
+   ["2. An leanúnachas","Rinneadh Gaeil de gach duine a tháinig, ach bhris na hÉireannaigh féin an ceangal.","Lochlannaigh, Normannaigh, saighdiúirí Chroiméil · Ó Conaill, Má Nuad"],
+   ["3. An teanga","Ba é cailleadh na Gaeilge an buille is troime.","an fear óg ó aonach Thuama · náire"],
+   ["4. An plean","Meath na Gaeilge a stopadh, agus faoi Fhéinriail í a chur sna scoileanna agus sna scrúduithe.","ar comhchéim leis an Laidin agus leis an Ghréigis"]],
+  extra:"",
+  items:[
+   {q:"Cad is ciall le ‘dí-Ghalldú’?", qen:"What does ‘de-Anglicisation’ mean?", a:"An cultúr Gallda (Sasanach) a bhaint as Éirinn agus filleadh ar an chultúr Ghaelach. Sílim gur díchoilíniú cultúrtha a bhí ann.", n:"díchoilíniú = decolonisation (téarma.ie). If you’d rather not use it, say: ‘Bhí sé ag iarraidh go mbeadh Éire Gaelach arís.’"},
+   {q:"Cad é an chéad téama?", qen:"What is the first theme?", a:"Bhí na hÉireannaigh ‘idir dhá thine Bhealtaine’: bhí fuath acu ar Shasana, ach rinne siad aithris uirthi i ngach rud."},
+   {q:"Cad é an dara téama?", qen:"What is the second theme?", a:"An leanúnachas i stair na hÉireann: rinneadh Gaeil de na Lochlannaigh agus de na Normannaigh, ach bhris na hÉireannaigh féin an ceangal sa 19ú haois."},
+   {q:"Cad é an tríú téama?", qen:"What is the third theme?", a:"An teanga: ba é cailleadh na Gaeilge ‘an buille is troime’, agus bhí náire ar dhaoine í a labhairt."},
+   {q:"Cad é an ceathrú téama?", qen:"What is the fourth theme?", a:"An plean: meath na Gaeilge a stopadh sna ceantair Ghaeltachta, agus faoi Fhéinriail an Ghaeilge a chur sna scrúduithe agus sna scoileanna."},
+   {q:"Cé air a gcuireann de hÍde an locht?", qen:"Who does Hyde blame?", a:"Ar Dhónall Ó Conaill, ar Choláiste Mhá Nuad, agus ar na hÉireannaigh féin."},
+   {q:"Inis scéal amháin ón léacht.", qen:"Tell one story from the lecture.", a:"Bhuail de hÍde le fear óg a bhí ag teacht ó aonach Thuama. Dúirt an fear nach raibh focal Béarla ag a thuismitheoirí, ach nach raibh Gaeilge ar bith aige féin."},
+   {q:"Cad a mhol de hÍde dá mbainfeadh Éire Féinriail amach?", qen:"What did Hyde propose if Ireland won Home Rule?", a:"Bheadh an Ghaeilge ar comhchéim leis an Laidin agus leis an Ghréigis sna scrúduithe, mhúinfí na páistí trí Ghaeilge sa Ghaeltacht, agus bheadh múinteoirí agus oifigigh le Gaeilge ann."},
+   {q:"An raibh an ceart ag de hÍde, dar leat?", qen:"Follow-up: was Hyde right, in your opinion?", a:"Sílim go raibh an ceart aige go raibh náire ar na daoine faoina dteanga. Ach níor labhair sé go leor faoin Drochshaol ná faoin imirce. Bhí an Béarla de dhíth ar dhaoine a bhí ag imeacht thar lear."},
+   {q:"Cén tionchar a bhí ag an léacht?", qen:"Follow-up: what influence did the lecture have?", a:"Bunaíodh Conradh na Gaeilge sa bhliain 1893. D’fhoghlaim cuid de cheannairí 1916 Gaeilge sa Chonradh. Tar éis 1922 fuair an Ghaeilge stádas san oideachas agus sa dlí, agus sa bhliain 1937 rinneadh an chéad teanga oifigiúil di."},
+   {q:"Cén bhaint atá ag Caisleáin Óir leis an léacht?", qen:"Follow-up: how does Caisleáin Óir connect to the lecture?", a:"Sa scoil, buaileann an máistir Séimí nuair nach dtugann sé freagra ar a ainm. Tá máthair Shéimí ag iarraidh Béarla do na páistí mar gheall ar an imirce. Taispeánann sé sin an náire agus na fáthanna eacnamaíocha a bhí taobh thiar de mheath na Gaeilge."},
+   {model:true, q:"Freagra samplach: Labhair faoi na téamaí sa léacht.", qen:"Model answer – read it twice, then say it without looking.", a:"Tá ceithre phríomhthéama sa léacht. Ar dtús, bhí na hÉireannaigh idir dhá thine Bhealtaine: bhí fuath acu ar Shasana, ach rinne siad aithris uirthi. Sa dara háit, bhí leanúnachas i stair na hÉireann ón tseanaimsir go dtí an 19ú haois, ach bhris na hÉireannaigh féin an ceangal sin. Chuir de hÍde an locht ar Dhónall Ó Conaill agus ar Mhá Nuad. Sa tríú háit, ba é cailleadh na teanga an buille ba throime, agus bhí náire ar na daoine óga Gaeilge a labhairt. Ar deireadh, mhol de hÍde plean: meath na Gaeilge a stopadh sa Ghaeltacht agus stádas a thabhairt don teanga sna scoileanna agus sna scrúduithe. Sílim go raibh an ceart aige faoin náire, ach níor smaoinigh sé go leor ar na fáthanna eacnamaíocha."}
+  ]}
+],
+
+// ─── CEIST 3 ───
+c3: [
+ {c:"Conas an sliocht a léamh", sub:"How to prepare the reading",
+  ga:"Léigh go mall agus go soiléir. Ná bí buartha faoi bhotún beag – lean ar aghaidh.",
+  en:"<b>Every day:</b> (1) read each Caisleáin Óir sample aloud once; (2) mark every séimhiú and urú in pencil on your sheet; (3) look up any word you can’t explain – the examiner may ask what a word means; (4) record yourself on your phone and listen back. <b>Tip:</b> paste a sample into <i>abair.ie</i> and choose the Ulster (Donegal) voice to hear how it should sound.",
+  table:[],
+  extra:"",
+  items:[]},
+ {c:"Fuaimniú: séimhiú agus urú", sub:"How the mutations sound",
+  ga:"Leis an séimhiú athraíonn an fhuaim; leis an urú ní chluintear ach an consan nua.",
+  en:"These are the rules you’ll use most when reading. Your Ulster dialect follows them too.",
+  table:[["Litreacha","Fuaim","Sampla"],
+   ["bh, mh","v (with e/i) or w (with a/o/u)","bhí · a mháthair mhór"],
+   ["ch","as in Scottish ‘loch’ (softer with e/i)","Cad chuige · ag teacht"],
+   ["dh, gh","throaty ‘gh’ (a/o/u) or ‘y’ (e/i)","a dhá shúil"],
+   ["fh","silent","nuair a fhágfas siad → ‘nuair a ágfas’"],
+   ["ph","f","a pháistí → ‘a fáistí’"],
+   ["sh, th","h","Séimí → a Shéimí · tháinig"],
+   ["urú: mb, gc, nd, bhf, bp, dt, ng","only the first letter is heard","ina mbalbháin · na gcoimhthíoch · na bpáistí · a bhfuil"],
+   ["n- / t- before a vowel","said as part of the word","a n-éilítear · an t-ainm"]],
+  extra:"<b>Ulster features you’ll hear:</b> stress usually falls on the first syllable; in Donegal speech <i>mn</i> often sounds like <i>mr</i> (<i>mná</i> → ‘mrá’), so <i>an mhnaoi</i> sounds roughly like ‘an wree’. Check any word you’re unsure of with abair.ie or focloir.ie (both have audio).",
+  items:[
+   {q:"Cad é an fhuaim atá ag ‘fh’ in ‘a fhágfas’?", qen:"How is ‘fh’ pronounced?", a:"Níl fuaim ar bith aige – it’s silent."},
+   {q:"‘na gcoimhthíoch’ – cén consan a chluintear ag an tús?", qen:"Which consonant do you hear at the start?", a:"g – after urú, only the new letter is heard."},
+   {q:"‘ina mbalbháin’ – cén consan a chluintear?", qen:"Which consonant do you hear?", a:"m"},
+   {q:"‘a Shorcha’ – cad é mar a deirtear ‘Sh’?", qen:"How is ‘Sh’ said?", a:"h – ‘a Horcha’."}
+  ]},
+ {c:"Stór focal · Sampla 1", sub:"Words to know before you read Sample 1", ga:"", en:"", table:[], extra:"", items:[
+   {q:"scaollmhar", a:"panicky, frightened"},
+   {q:"níorbh iontaí leis ná…", a:"it was no stranger to him than… (he found it extremely strange)"},
+   {q:"trioc", a:"furniture"},
+   {q:"cuinneog", a:"churn (for butter)"},
+   {q:"ceann urraidh", a:"head of the household, the one in charge"},
+   {q:"féasóg", a:"beard"},
+   {q:"confach", a:"vicious, cranky"},
+   {q:"dreach cointinneach", a:"quarrelsome expression"},
+   {q:"tachrán", a:"small child (Ulster)"},
+   {q:"ar ghreim láimhe léi", a:"holding her hand"}
+ ]},
+ {c:"Stór focal · Sampla 2", sub:"", ga:"", en:"", table:[], extra:"", items:[
+   {q:"an mhnaoi", a:"the woman – old dative of bean, still used in Ulster (Caighdeán: an bhean / an mbean)"},
+   {q:"go cineál fuarbhruite", a:"rather coldly, half-heartedly"},
+   {q:"dornán", a:"a little, a handful"},
+   {q:"dhruid sé", a:"he closed (Ulster druid = close)"},
+   {q:"i gcuideachta", a:"in the company of"},
+   {q:"scaifte", a:"crowd, bunch"},
+   {q:"fána thuairim féin méide", a:"about his own size (fá = faoi)"},
+   {q:"ina ghasúr mhaith", a:"as a good boy (behave yourself)"}
+ ]},
+ {c:"Stór focal · Sampla 3", sub:"", ga:"", en:"", table:[], extra:"", items:[
+   {q:"an mháthair mhór", a:"grandmother"},
+   {q:"chun an bhaile", a:"home(wards)"},
+   {q:"ag séideadh na luatha", a:"blowing the ashes (off the potatoes)"},
+   {q:"á rósadh sa ghríosaigh", a:"being roasted in the embers"},
+   {q:"fá choinne an dinnéara", a:"for the dinner (Caighdeán: le haghaidh)"},
+   {q:"glór an chaointe", a:"the sound of crying"},
+   {q:"feasta", a:"from now on, any more"},
+   {q:"trasna na cloigne", a:"across the head (cloigeann → gin. na cloigne)"},
+   {q:"cionn is", a:"because (Ulster)"},
+   {q:"ach é theacht ón fharraige", a:"as soon as he comes back from the sea"}
+ ]},
+ {c:"Stór focal · Sampla 4", sub:"", ga:"", en:"", table:[], extra:"", items:[
+   {q:"’gheall ar", a:"intent on, set on (= i ngeall ar)"},
+   {q:"gan bhéal gan teanga", a:"speechless, unable to speak"},
+   {q:"i measc na gcoimhthíoch", a:"among strangers"},
+   {q:"ar an drochuair", a:"unfortunately"},
+   {q:"domh", a:"to me (Ulster; Caighdeán dom)"},
+   {q:"conamar", a:"scrap, fragment (dá laghad conamar Béarla = however little scrap of English)"},
+   {q:"ina mbalbháin", a:"mute (lit. ‘in their mutes’)"},
+   {q:"Log an tSeantí", a:"Séimí’s home place in the novel"}
+ ]},
+ {c:"Stór focal · Sampla 5", sub:"", ga:"", en:"", table:[], extra:"", items:[
+   {q:"bratóga", a:"rags"},
+   {q:"seanchró", a:"old hovel (cró = hut, shed)"},
+   {q:"thoisigh … ag gairí", a:"started laughing (Caighdeán: thosaigh … ag gáire)"},
+   {q:"altaíodh sé iad", a:"let him be thankful for them (imperative, 3rd person)"},
+   {q:"ceachtar acu", a:"either of them"},
+   {q:"giolla na gorta agus na hainnise", a:"a servant of hunger and misery – someone raised in poverty"},
+   {q:"airgead lochtach", a:"ill-gotten money (lochtach = faulty, at fault)"},
+   {q:"ag tochailt aníos", a:"digging up (old stories)"},
+   {q:"os coinne na bpáistí", a:"in front of the children (= os comhair)"}
+ ]}
+],
+
+// ─── CEIST 4 extras ───
+c4extra: [
+ {c:"Malairtí úsáideacha", sub:"Handy swaps for making ‘another way’",
+  ga:"Trí dhóigh le malairt a dhéanamh: (1) focal eile, (2) struchtúr eile, (3) míniú simplí.",
+  en:"These swaps work in lots of phrases. Learn them and you can build alternatives on the spot.",
+  table:[], extra:"",
+  items:[
+   {q:"amharc ar", a:"féach ar · breathnaigh ar"},
+   {q:"cad chuige?", a:"cén fáth? · cad é an fáth?"},
+   {q:"goidé mar…?", a:"cad é mar…? · conas…?"},
+   {q:"ar an drochuair", a:"faraor · is trua"},
+   {q:"feasta", a:"as seo amach · níos mó"},
+   {q:"anallód", a:"fadó · sna seanlaethanta"},
+   {q:"is gráin linn í", a:"tá fuath againn uirthi · ní maith linn í ar chor ar bith"},
+   {q:"cuir bac le", a:"cuir stop le · cuir cosc ar"},
+   {q:"tabhair freagra ar", a:"freagair"},
+   {q:"d’imigh sí", a:"d’fhág sí · chuaigh sí abhaile"},
+   {q:"os coinne", a:"os comhair"},
+   {q:"tá mé den bharúil", a:"sílim · is é mo thuairim"},
+   {q:"Ar a bharr seo", a:"Chomh maith leis sin · Lena chois sin"},
+   {q:"idir dhá thine Bhealtaine", a:"i bponc · i gcruachás"},
+   {q:"gur beag baol", a:"nach dócha · nach bhfuil seans mór ann"}
+  ]}
+],
+
+// ─── Ó GRIANNA ───
+og: [
+ {c:"Séamus Ó Grianna (‘Máire’)", sub:"In case you’re asked about the author of Caisleáin Óir",
+  ga:"Tá ‘cúlra an leabhair agus an údair’ sa lámhleabhar, agus tá ‘Cuir síos ar chúlra an údair’ ar an bhileog chleachtaidh faoi shliocht as Caisleáin Óir.",
+  en:"Your handbook and practice sheet both suggest you could be asked about Ó Grianna, not just Hyde. Ask Art to confirm. These facts come from the <i>Dictionary of Irish Biography</i> entry by Ailbhe Ó Corráin (2009), except where marked.",
+  table:[["Bliain","Fíric"],
+   ["1889","Rugadh é i Rann na Feirste, Contae Dhún na nGall (17 Samhain)."],
+   ["—","Mac le feirmeoir beag agus iascaire; teaghlach filí agus amhránaithe. Ba é Seosamh Mac Grianna a dheartháir."],
+   ["—","Bhí sé ag obair in Albain nuair a bhí sé óg."],
+   ["1910–14","Coláiste Uladh (Gort an Choirce), ansin Coláiste Phádraig, Droim Conrach: cáilíodh mar mhúinteoir é."],
+   ["1914–20","Múinteoir i dTír Eoghain agus i dTír Chonaill."],
+   ["1922–23","Sa Chogadh Cathartha bhí sé ar thaobh na bPoblachtach; coinníodh i gcampa sa Churrach é."],
+   ["1921 · 1924","Mo Dhá Róisín (1921) agus Caisleáin Óir (1924) – a chéad úrscéalta."],
+   ["—","D’aistrigh sé leabhair don Ghúm; ó 1932 bhí sé sa státseirbhís (custaim)."],
+   ["1942 · 1945","Nuair a Bhí Mé Óg (1942) agus Saol Corrach (1945) – a dhírbheathaisnéis."],
+   ["—","Bhí sé in éadan an Chaighdeáin agus an chló Rómhánaigh."],
+   ["1966","Chuaigh sé isteach sa Language Freedom Movement (Literature Ireland)."],
+   ["1969","Fuair sé bás i mBaile Átha Cliath."]],
+  extra:"<b>Link to Hyde:</b> Ó Grianna was one of the Gaeltacht writers the League gave a platform to (Hughes 2012b, n. 29). Yet by 1966 he had joined the movement against compulsory Irish. That’s a good point to make if you get a follow-up question.",
+  items:[
+   {q:"Cá háit agus cá huair ar rugadh Séamus Ó Grianna?", qen:"Where and when was he born?", a:"I Rann na Feirste, i gContae Dhún na nGall, sa bhliain 1889 (ocht déag ochtó a naoi)."},
+   {q:"Cén t-ainm cleite a bhí air?", qen:"What was his pen name?", a:"‘Máire’."},
+   {q:"Cé hé a dheartháir cáiliúil?", qen:"Who was his famous brother?", a:"Seosamh Mac Grianna, scríbhneoir eile."},
+   {q:"Cén obair a bhí aige?", qen:"What work did he do?", a:"Bhí sé ina mhúinteoir, ansin d’aistrigh sé leabhair don Ghúm, agus bhí sé sa státseirbhís."},
+   {q:"Cad a rinne sé sa Chogadh Cathartha?", qen:"What did he do in the Civil War?", a:"Bhí sé ar thaobh na bPoblachtach, agus coinníodh i gcampa sa Churrach é."},
+   {q:"Cá huair a foilsíodh Caisleáin Óir?", qen:"When was Caisleáin Óir published?", a:"Sa bhliain 1924."},
+   {q:"Cad a cheap sé faoin Chaighdeán?", qen:"What did he think of the Caighdeán?", a:"Bhí sé ina éadan. Níor lig sé dá shaothar a bheith foilsithe sa litriú nua."},
+   {model:true, q:"Freagra samplach: Cuir síos ar chúlra an údair.", qen:"Model answer – read it twice, then say it without looking.", a:"Rugadh Séamus Ó Grianna i Rann na Feirste i gContae Dhún na nGall sa bhliain 1889. Bhí a athair ina fheirmeoir beag agus ina iascaire, agus bhí filí agus amhránaithe sa teaghlach. Ba é Seosamh Mac Grianna a dheartháir. Nuair a bhí sé óg, bhí sé ag obair in Albain. Ina dhiaidh sin rinne sé cúrsa i gColáiste Uladh agus i gColáiste Phádraig, agus bhí sé ina mhúinteoir. Sa Chogadh Cathartha bhí sé ar thaobh na bPoblachtach, agus coinníodh i gcampa sa Churrach é. Níos moille d’oibrigh sé don Ghúm agus sa státseirbhís. Scríobh sé faoin ainm cleite ‘Máire’, agus foilsíodh Caisleáin Óir sa bhliain 1924. Fuair sé bás sa bhliain 1969."}
+  ]},
+ {c:"Caisleáin Óir (1924)", sub:"The book’s background",
+  ga:"Scéal grá brónach faoi Shéimí agus Babaí, a d’fhás aníos i Rann na Feirste ag tús an 20ú haois.",
+  en:"Based on the publisher’s description (Mercier Press): the blighting of young love by poverty and economic necessity, set among hiring fairs, gombeen shopkeepers and migrant work in Scotland, with a bleak ending. The title comes from the children’s game of seeing the sunset clouds as golden castles where the fairies (<i>na daoine beaga</i>) live. Check all of this against your own reading of the book.",
+  table:[], extra:"",
+  items:[
+   {q:"Cad faoi a bhfuil Caisleáin Óir?", qen:"What is Caisleáin Óir about?", a:"Is scéal grá brónach é faoi Shéimí agus Babaí. Milltear a ngrá mar gheall ar an bhochtanas agus ar an imirce go hAlbain."},
+   {q:"Cá bhfuil an scéal suite?", qen:"Where is the story set?", a:"I Rann na Feirste i dTír Chonaill, ag tús an 20ú haois."},
+   {q:"Cad as a dtáinig an teideal?", qen:"Where does the title come from?", a:"Nuair a bhí siad óg, dúirt Séimí le Babaí gur caisleáin óir a bhí sna néalta ag luí na gréine, áit a raibh na daoine beaga ina gcónaí."},
+   {q:"Cad iad na téamaí sa leabhar?", qen:"What are the book’s themes?", a:"An grá, an bochtanas, an imirce, obair chrua in Albain, agus an Béarla ag teacht isteach sa scoil agus sa bhaile."}
+  ]}
+],
+
+// ─── FRÁSAÍ CAINTE ───
+fr: [
+ {c:"Am a cheannach", sub:"Buying time while you think", ga:"", en:"Pausing with a phrase in Irish sounds much better than silence or English.", table:[], extra:"", items:[
+   {qen:"Well…", a:"Bhuel…"},
+   {qen:"That’s a good question.", a:"Sin ceist mhaith."},
+   {qen:"Let me see…", a:"Fan go bhfeice mé…"},
+   {qen:"How will I put it…", a:"Cad é mar a déarfaidh mé é…"},
+   {qen:"I’m not very sure, but I think…", a:"Níl mé iontach cinnte, ach sílim go…"}
+ ]},
+ {c:"Do thuairim a thabhairt", sub:"Giving your opinion", ga:"", en:"", table:[], extra:"", items:[
+   {qen:"In my opinion…", a:"Is é mo bharúil go… / I mo bharúil féin…"},
+   {qen:"I agree with that up to a point.", a:"Aontaím leis sin go pointe."},
+   {qen:"I don’t agree with that, because…", a:"Ní aontaím leis sin, mar…"},
+   {qen:"On the one hand… on the other hand…", a:"Ar an lámh amháin… ar an lámh eile…"},
+   {qen:"It was a great achievement.", a:"Ba éacht mór é."}
+ ]},
+ {c:"Iarr orthu an cheist a chur arís", sub:"If you didn’t catch the question", ga:"", en:"", table:[], extra:"", items:[
+   {qen:"Sorry, could you ask the question again?", a:"Gabh mo leithscéal, an dtiocfadh leat an cheist a chur arís?"},
+   {qen:"Could you speak a bit slower?", a:"An dtiocfadh leat labhairt rud beag níos moille?"},
+   {qen:"I don’t understand that word.", a:"Ní thuigim an focal sin."}
+ ]},
+ {c:"Míniú a thabhairt (Ceist 4)", sub:"Frames for explaining a phrase", ga:"", en:"", table:[], extra:"", items:[
+   {qen:"That is to say…", a:"Is é sin le rá…"},
+   {qen:"It means…", a:"Ciallaíonn sé…"},
+   {qen:"Another way to say it is…", a:"Dóigh eile le é a rá ná…"},
+   {qen:"It’s the same as…", a:"Is ionann é agus…"},
+   {qen:"It has the same meaning.", a:"Tá an bhrí chéanna leis."}
+ ]},
+ {c:"Nascadh", sub:"Linking your points", ga:"", en:"", table:[], extra:"", items:[
+   {qen:"First… then… after that… finally…", a:"Ar dtús… ansin… ina dhiaidh sin… ar deireadh…"},
+   {qen:"For example…", a:"Mar shampla…"},
+   {qen:"As well as that…", a:"Chomh maith leis sin…"},
+   {qen:"However…", a:"Mar sin féin…"},
+   {qen:"Because of that…", a:"Mar gheall air sin…"}
+ ]}
+]
+};
+
+// ───────── MÍNIÚ AR DHÁ DHÓIGH (Ceist 4) ─────────
+// q = phrase from the sheet, en = meaning, w = two other ways in Irish, n = note
+const MINIU = [
+ {c:"Caisleáin Óir · Sampla 1", items:[
+  {q:"Ar a dhul isteach go teach na scoile dó", en:"As he was going into the schoolhouse", w:["Nuair a chuaigh sé isteach sa scoil","Agus é ag dul isteach i dteach na scoile"], n:"ar + verbal noun + do = ‘on his going’."},
+  {q:"d’amharc sé go scaollmhar thart ar gach taobh de", en:"he looked all around him in a panic", w:["d’fhéach sé thart air go faiteach","bhí eagla air agus é ag amharc thart air"], n:"amharc = Ulster ‘look’ (Caighdeán féach)."},
+  {q:"níorbh iontaí leis ná an sneachta dearg an cineál tí a bhí ann", en:"the kind of house it was seemed as strange to him as red snow", w:["bhí iontas an domhain air faoin chineál tí a bhí ann","shíl sé go raibh an teach an-aisteach ar fad"], n:"níorbh iontaí … ná = it was no stranger … than (past comparative with the copula)."},
+  {q:"ceann urraidh", en:"head of the household, the one in charge", w:["an duine a bhí i gceannas","ceann an teaghlaigh"], n:""},
+  {q:"dreach cointinneach", en:"a quarrelsome expression", w:["cuma chrosta air","aghaidh a bhí réidh le hachrann"], n:"cuma is feminine → cuma chrosta."}
+ ]},
+ {c:"Caisleáin Óir · Sampla 2", items:[
+  {q:"ar an mhnaoi a tháinig isteach", en:"at the woman who came in", w:["ar an bhean a shiúil isteach","ar an bhean a bhí díreach i ndiaidh teacht isteach"], n:"an mhnaoi = old dative of bean, still used in Ulster (Caighdeán: ar an mbean)."},
+  {q:"bheannaigh sé di go cineál fuarbhruite", en:"he greeted her rather coldly / half-heartedly", w:["níor chuir sé fáilte mhór roimpi","labhair sé léi, ach ní raibh mórán teasa ina ghlór"], n:"go cineál = sort of, rather."},
+  {q:"a bhí fána thuairim féin méide", en:"who were about his own size", w:["a bhí chomh mór leis féin, nó beagnach","a bhí thart ar an aois chéanna leis"], n:"fá = Ulster faoi; fána = faoina."},
+  {q:"d’imigh sí", en:"she left", w:["d’fhág sí an áit","chuaigh sí abhaile"], n:""},
+  {q:"Bhí scaifte gasúr, agus Séimí ina measc", en:"There was a bunch of children, with Séimí among them", w:["Bhí grúpa páistí ann, agus bhí Séimí ar dhuine acu","Bhí a lán gasúr ann, Séimí san áireamh"], n:""}
+ ]},
+ {c:"Caisleáin Óir · Sampla 3", items:[
+  {q:"Seo chugainn Séimí bocht", en:"Here comes poor Séimí", w:["Tá Séimí bocht ag teacht","Féach, tá Séimí bocht ag teacht chugainn"], n:""},
+  {q:"Goidé mar a chuir tú isteach an lá?", en:"How did you spend the day?", w:["Cad é mar a chaith tú an lá?","Cad é mar a bhí an lá agat?"], n:"goidé = Ulster cad é; cuir isteach an lá = pass the day."},
+  {q:"agus glór an chaointe ina cheann", en:"with the sound of crying in his voice", w:["agus é beagnach ag caoineadh","agus a ghlór briste le brón"], n:""},
+  {q:"Cad chuige sin, a leanbh?", en:"Why’s that, child?", w:["Cén fáth, a leanbh?","Cad é an fáth atá leis sin, a stór?"], n:"cad chuige = Ulster ‘why’."},
+  {q:"bhuail an fear confach udaí inniu mé", en:"that vicious man hit me today", w:["thug an fear crosta sin buille dom inniu","bhuail an máistir cantalach sin mé inniu"], n:"udaí = Ulster úd (that, yonder)."}
+ ]},
+ {c:"Caisleáin Óir · Sampla 4", items:[
+  {q:"an bhfuil tú ’gheall ar a bheith gan bhéal gan teanga?", en:"do you want to be left without a word to say?", w:["ar mhaith leat a bheith gan focal le rá?","an bhfuil fonn ort a bheith i do bhalbhán?"], n:"’gheall ar = i ngeall ar, ‘intent on’."},
+  {q:"nuair a rachas tú i measc na gcoimhthíoch", en:"when you go among strangers", w:["nuair a rachaidh tú i measc strainséirí","nuair a bheidh tú thar lear i measc daoine nach bhfuil aithne agat orthu"], n:"rachas = Ulster relative future (Caighdeán: rachaidh)."},
+  {q:"tusa a mhill na páistí", en:"it’s you who spoiled the children", w:["is tusa a rinne dochar do na páistí","is ortsa atá an locht faoi na páistí"], n:"Fronted for emphasis with the copula."},
+  {q:"Níl a hathrach agam", en:"I have no choice / I can’t help it", w:["Níl an dara rogha agam","Ní thig liom a mhalairt a dhéanamh"], n:"athrach = alternative; a hathrach = ‘its’ (feminine) alternative."},
+  {q:"ba cheart dúinn a chur roimh na páistí", en:"we ought to put it (English) before the children", w:["ba chóir dúinn é a mhúineadh do na páistí","ba cheart dúinn é a thabhairt do na páistí"], n:""}
+ ]},
+ {c:"Caisleáin Óir · Sampla 5", items:[
+  {q:"Chaith sé suas bratóga agus seanchró liom", en:"He taunted me about rags and a hovel (our poverty)", w:["Rinne sé magadh orm faoi mo chuid éadaigh stróicthe agus faoinár dteach bocht","Bhí sé ag fonóid orm mar go bhfuil muid bocht"], n:"caith suas le duine = throw something up at someone, taunt."},
+  {q:"Ná tabhair aird air", en:"Pay no attention to him", w:["Ná bac leis","Ná héist leis"], n:""},
+  {q:"altaíodh sé iad", en:"let him be thankful for them", w:["bíodh sé buíoch astu","ba chóir dó buíochas a ghabháil le Dia astu"], n:"Imperative 3rd person – not the autonomous (it has ‘sé’ after it)."},
+  {q:"Giolla na gorta agus na hainnise", en:"a servant of hunger and misery (someone raised in poverty)", w:["duine a tógadh i mbochtanas","fear a raibh ocras agus anró air nuair a bhí sé óg"], n:""},
+  {q:"os coinne na bpáistí", en:"in front of the children", w:["os comhair na bpáistí","agus na páistí ag éisteacht"], n:"Both take the genitive: na bpáistí."}
+ ]},
+ {c:"De hÍde · Sampla 1", items:[
+  {q:"rud a mbeifí ag súil leis", en:"something one would expect", w:["rud nach gcuirfeadh iontas ar aon duine","rud atá nádúrtha go leor"], n:"mbeifí = conditional autonomous of bí."},
+  {q:"is ceist í fosta ar cheart do gach Aontachtóir ciallmhar breathnú go báúil uirthi", en:"it is also a question every sensible Unionist should look at sympathetically", w:["ba chóir do gach Aontachtóir a bhfuil ciall aige smaoineamh go cineálta ar an cheist seo fosta","ba cheart do na hAontachtóirí ciallmhara fosta an cheist seo a phlé le tuiscint"], n:"The sheet has ‘Aontachtdóir’ – a slip."},
+  {q:"anallód", en:"long ago, in olden times", w:["fadó","sna seanlaethanta"], n:""},
+  {q:"mar a admhaítear go forleathan", en:"as is widely admitted", w:["mar a deir a lán daoine","mar a aontaíonn beagnach gach duine"], n:"admhaítear = present autonomous of admhaigh."},
+  {q:"maolú", en:"weakening, decline", w:["meath","laghdú"], n:""}
+ ]},
+ {c:"De hÍde · Sampla 2", items:[
+  {q:"Ba mhaith liom aird a tharraingt", en:"I’d like to draw attention", w:["Ba mhaith liom tagairt a dhéanamh do…","Ba mhaith liom labhairt faoi…"], n:""},
+  {q:"a mhaíonn os ard", en:"who claim openly / loudly", w:["a deir go poiblí","a bhíonn á rá go glórach"], n:"The sheet has ‘gos ard’ – a slip for os ard."},
+  {q:"fir a chaitheann a dteanga dhúchais féin uathu", en:"men who throw away their own native language", w:["fir a thréigeann a dteanga féin","fir nach labhraíonn a dteanga dhúchais níos mó"], n:"Direct relative: a chaitheann."},
+  {q:"aineolach ar litríocht na Gaeilge", en:"ignorant of Irish literature", w:["gan eolas ar bith acu ar litríocht na Gaeilge","nach bhfuil a fhios acu rud ar bith faoi litríocht na Gaeilge"], n:""},
+  {q:"cúl le cine", en:"turning your back on your own people", w:["do mhuintir féin a thréigean","droim láimhe a thabhairt do do dhúchas"], n:"From the proverb: Is olc an rud cúl le cine."}
+ ]},
+ {c:"De hÍde · Sampla 3", items:[
+  {q:"Baintear siar asam i gcónaí", en:"I am always taken aback", w:["Cuireann sé iontas orm i gcónaí","Bíonn ionadh orm i gcónaí"], n:"Present autonomous of bain."},
+  {q:"sa riocht idir eadarthu seo", en:"in this in-between state", w:["sa staid leath bealaigh seo","gan a bheith ina rud amháin ná ina rud eile"], n:""},
+  {q:"fuath acu ar Shasain", en:"their hatred of England", w:["is gráin leo Sasana","ní maith leo Sasana ar chor ar bith"], n:"Sasain = Hughes’s form; Caighdeán Sasana."},
+  {q:"an tslí a n-éilítear aitheantas d’Éirinn mar náisiún ar leith", en:"the way recognition is demanded for Ireland as a separate nation", w:["an dóigh a n-iarrann siad go n-aithneofaí Éire mar náisiún ar leith","an dóigh a bhfuil siad ag iarraidh go nglacfadh an domhan le hÉirinn mar náisiún neamhspleách"], n:"Indirect relative + autonomous: a n-éilítear."},
+  {q:"gur beag baol", en:"that there’s little danger / chance", w:["nach dócha","nach bhfuil seans mór ann"], n:""}
+ ]},
+ {c:"De hÍde · Sampla 4", items:[
+  {q:"Tabharfaidh mé freagra ar na ceisteanna seo", en:"I will answer these questions", w:["Freagróidh mé na ceisteanna seo","Déanfaidh mé iarracht na ceisteanna seo a fhreagairt"], n:""},
+  {q:"idir dhá thine Bhealtaine", en:"in a dilemma", w:["i bponc","i gcruachás"], n:"See Comhthéacs for where the idiom comes from."},
+  {q:"gur gráin linn í", en:"that we hate her (England)", w:["go bhfuil fuath againn uirthi","nach maith linn í ar chor ar bith"], n:""},
+  {q:"Ar a bharr seo", en:"On top of this", w:["Chomh maith leis sin","Lena chois sin"], n:""},
+  {q:"a chuireann bac linn", en:"which prevents us", w:["a chuireann stop linn","a fhágann nach dtig linn"], n:"cuir bac le = prevent."}
+ ]}
+];
+
+</script>
+<script>
+(function(){
+"use strict";
+const LS_KEY = "hyde-beil-v1";
+let prog = {};
+try { prog = JSON.parse(localStorage.getItem(LS_KEY) || "{}") || {}; } catch (e) { prog = {}; }
+function save(){ try { localStorage.setItem(LS_KEY, JSON.stringify(prog)); } catch (e) {} }
+
+// ───────── BUILD ─────────
+const GROUPS = {}, ITEMS = [], byId = {};
+function add(it){ ITEMS.push(it); byId[it.id] = it; }
+Object.keys(SECS).forEach(k => {
+  const sec = k === "c4extra" ? "c4" : k;
+  GROUPS[sec] = GROUPS[sec] || [];
+  SECS[k].forEach((g, gi) => {
+    GROUPS[sec].push(g);
+    g.items.forEach((it, i) => add(Object.assign({id: k + "_" + gi + "_" + i, s: sec, c: g.c}, it)));
+  });
+});
+// Míniú groups go first in Ceist 4
+const MIN_GROUPS = MINIU.map(g => ({c: g.c, sub: "Léigh an sliocht ar do bhileog ar dtús · read the passage on your sheet first", items: g.items}));
+GROUPS.c4 = MIN_GROUPS.concat(GROUPS.c4 || []);
+MINIU.forEach((g, gi) => g.items.forEach((m, i) => add({id: "m" + gi + "_" + i, s: "c4", c: g.c, q: m.q, en: m.en, w: m.w, n: m.n, miniu: true})));
+
+const TABS = [
+  {id:"treoir", label:"Treoir"},
+  {id:"c1", label:"Ceist 1 · de hÍde"},
+  {id:"c2", label:"Ceist 2 · Téamaí"},
+  {id:"c3", label:"Ceist 3 · Léamh"},
+  {id:"c4", label:"Ceist 4 · Míniú"},
+  {id:"og", label:"Ó Grianna"},
+  {id:"fr", label:"Frásaí cainte"},
+  {id:"mock", label:"Scrúdú bréige"}
+];
+const LIST = ["c1","c2","c3","c4","og","fr"];
+const LABEL = {c1:"Ceist 1", c2:"Ceist 2", c3:"Ceist 3", c4:"Ceist 4", og:"Ó Grianna", fr:"Frásaí"};
+const countable = i => !i.model;
+
+// ───────── HELPERS ─────────
+const stOf = id => prog[id] || "";
+function statusOK(it, f){ if (f === "no") return stOf(it.id) === "no"; if (f === "new") return !stOf(it.id); return true; }
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const ebox = (label, text) => `<div class="english-box"><span class="lbl">${label}</span><div class="english-text">${text}</div></div>`;
+
+function refreshCounts(){
+  const items = ITEMS.filter(countable);
+  let ok = 0, no = 0;
+  items.forEach(i => { if (prog[i.id] === "ok") ok++; else if (prog[i.id] === "no") no++; });
+  document.getElementById("sb-ok").textContent = ok;
+  document.getElementById("sb-no").textContent = no;
+  document.getElementById("sb-total").textContent = items.length;
+  document.getElementById("stats").innerHTML = LIST.map(s => {
+    const its = items.filter(i => i.s === s);
+    return `<div class="stat"><strong>${its.filter(i => prog[i.id] === "ok").length}/${its.length}</strong>${LABEL[s]}</div>`;
+  }).join("");
+}
+
+// ───────── CARDS ─────────
+function promptHTML(it){
+  if (it.miniu) return `<div class="irish-question">${it.q}</div>`;
+  let h = "";
+  if (it.qen) h += ebox(it.model ? "Freagra samplach" : (it.q ? "English" : "Conas a déarfá…?"), it.qen);
+  if (it.q) h += `<div class="irish-question">${it.q}</div>`;
+  return h;
+}
+function answerHTML(it){
+  if (it.miniu) return `<span class="lbl">Brí · meaning</span><div class="ans-en">${it.en}</div><span class="lbl">Dhá dhóigh eile</span><ol class="ways">${it.w.map(w => `<li>${w}</li>`).join("")}</ol>` + (it.n ? `<div class="ans-note">${it.n}</div>` : "");
+  return `<div class="ans-main">${it.a}</div>` + (it.n ? `<div class="ans-note">${it.n}</div>` : "") + (it.src ? `<div class="src">Foinse: ${it.src}</div>` : "");
+}
+function pill(id){ const s = stOf(id); return s === "ok" ? `<span class="st ok">✓ ar eolas</span>` : s === "no" ? `<span class="st no">✗ le hathbhreithniú</span>` : ""; }
+function markRow(id){
+  const s = stOf(id);
+  return `<div class="mark-row"><button class="mark ok ${s==="ok"?"chosen":""}" data-mark="ok" data-id="${id}">✓ Bhí mé ceart</button><button class="mark no ${s==="no"?"chosen":""}" data-mark="no" data-id="${id}">✗ Ní raibh</button></div>`;
+}
+function cardHTML(it){
+  const cls = it.model ? "model" : (stOf(it.id) === "ok" ? "st-ok" : stOf(it.id) === "no" ? "st-no" : "");
+  const btn = it.model ? "Taispeáin an freagra samplach" : "Taispeáin an freagra";
+  return `<div class="qcard ${cls}" data-card="${it.id}"><div class="qtop">${it.model ? "" : pill(it.id)}</div>${promptHTML(it)}` +
+    `<button class="reveal-btn" data-reveal="${it.id}">${btn}</button>` +
+    `<div class="answer hidden">${answerHTML(it)}${it.model ? "" : markRow(it.id)}</div></div>`;
+}
+function updateCard(id){
+  document.querySelectorAll('.qcard[data-card="' + id + '"]').forEach(el => {
+    el.classList.remove("st-ok","st-no");
+    if (stOf(id)) el.classList.add("st-" + stOf(id));
+    const top = el.querySelector(".qtop"); if (top) top.innerHTML = pill(id);
+    el.querySelectorAll(".mark").forEach(b => b.classList.toggle("chosen", b.dataset.mark === stOf(id)));
+  });
+}
+function setMark(id, v){ prog[id] = v; save(); refreshCounts(); updateCard(id); const s = byId[id].s; if (LIST.indexOf(s) >= 0) renderChips(s); }
+
+function noteHTML(g){
+  let h = g.sub ? `<div class="sub">${g.sub}</div>` : "";
+  if (g.ga || g.en || (g.table && g.table.length) || g.extra){
+    h += `<div class="note">`;
+    if (g.ga) h += `<div class="note-ga">${g.ga}</div>`;
+    if (g.en) h += `<div class="note-en">${g.en}</div>`;
+    if (g.table && g.table.length){
+      h += `<div class="tablewrap"><table class="gt"><tr>${g.table[0].map(x => `<th>${x}</th>`).join("")}</tr>` +
+        g.table.slice(1).map(r => `<tr>${r.map(x => `<td>${x}</td>`).join("")}</tr>`).join("") + `</table></div>`;
+    }
+    if (g.extra) h += `<div class="note-extra">${g.extra}</div>`;
+    h += `</div>`;
+  }
+  return h;
+}
+
+// ───────── LISTS ─────────
+const state = {}; LIST.forEach(s => state[s] = {cat:"all", st:"all"});
+function renderChips(sec){
+  const st = state[sec], items = ITEMS.filter(i => i.s === sec && countable(i));
+  const cats = GROUPS[sec].map(g => g.c);
+  const ch = (v, l, a, x) => `<button class="chip ${a?"active":""}" data-sec="${sec}" data-cat="${esc(v)}">${l}${x||""}</button>`;
+  let h = ch("all", "Gach rud", st.cat === "all", `<span class="cnt">${items.filter(i=>prog[i.id]==="ok").length}/${items.length}</span>`);
+  cats.forEach(c => { const its = items.filter(i => i.c === c); h += ch(c, c, st.cat === c, its.length ? `<span class="cnt">${its.filter(i=>prog[i.id]==="ok").length}/${its.length}</span>` : ""); });
+  document.getElementById("chips-" + sec).innerHTML = h;
+  const sc = (v, l) => `<button class="chip sm ${st.st===v?"active":""}" data-sec="${sec}" data-st="${v}">${l}</button>`;
+  document.getElementById("stchips-" + sec).innerHTML = `<span class="chip-label">Taispeáin</span>` + sc("all","Uile") + sc("new","Gan triail") + sc("no","Le hathbhreithniú");
+}
+function renderList(sec){
+  const st = state[sec];
+  let h = "";
+  GROUPS[sec].forEach(g => {
+    if (st.cat !== "all" && st.cat !== g.c) return;
+    const its = ITEMS.filter(i => i.s === sec && i.c === g.c && (i.model ? st.st === "all" : statusOK(i, st.st)));
+    if (!its.length && st.st !== "all") return;
+    h += `<section class="group"><h2>${g.c}</h2>${noteHTML(g)}${its.map(cardHTML).join("")}</section>`;
+  });
+  document.getElementById("list-" + sec).innerHTML = h || `<p class="empty">Níl aon rud anseo leis an scagaire seo · nothing matches this filter.</p>`;
+}
+
+// ───────── MOCK EXAM ─────────
+const mock = {step:0, sample:0, minGroup:0, secs:120, left:120, timer:null};
+const C1_POINTS = SECS.c1[0].table.slice(1).map(r => `${r[0] !== "—" ? "<b>" + r[0] + "</b> · " : ""}${r[1]}`);
+const C2_POINTS = SECS.c2[0].table.slice(1).map(r => `<b>${r[0]}</b> – ${r[1]}`);
+const OG_POINTS = SECS.og[0].table.slice(1).map(r => `${r[0] !== "—" ? "<b>" + r[0] + "</b> · " : ""}${r[1]}`);
+
+function fmt(s){ const m = Math.floor(s / 60), x = s % 60; return m + ":" + (x < 10 ? "0" : "") + x; }
+function timerHTML(hint){ mock.hint = hint || "Labhair go dtí go mbíonn an t-am istigh · keep talking until the time is up."; return `<div class="timer" id="timer-box">${timerInner()}</div>`; }
+function timerInner(){ return `<span class="t-clock ${mock.left === 0 ? "done" : ""}" id="t-clock">${fmt(mock.left)}</span>` +
+  `<button class="btn" id="tm-start">${mock.timer ? "Stad" : "Tosaigh an clog"}</button><button class="btn" id="tm-reset">Atosaigh</button>` +
+  `<span class="t-hint">${mock.left === 0 ? "Am istigh!" : mock.hint}</span>`; }
+function renderTimer(){ const b = document.getElementById("timer-box"); if (b) b.innerHTML = timerInner(); }
+function stopTimer(){ if (mock.timer){ clearInterval(mock.timer); mock.timer = null; } }
+function resetTimer(sec){ stopTimer(); mock.secs = sec; mock.left = sec; }
+function tick(){
+  mock.left = Math.max(0, mock.left - 1);
+  const c = document.getElementById("t-clock"); if (c){ c.textContent = fmt(mock.left); }
+  if (mock.left === 0){ stopTimer(); renderTimer(); }
+}
+function pointsBox(title, pts){
+  return `<button class="reveal-btn" data-toggle="pts">Taispeáin na pointí</button><div class="answer hidden" id="pts"><span class="lbl">${title}</span><ul class="pts">${pts.map(p => `<li>${p}</li>`).join("")}</ul></div>`;
+}
+function renderMock(){
+  const box = document.getElementById("mock-body");
+  const steps = ["Tús", "Ceist 1", "Ceist 2", "Ceist 3", "Ceist 4", "Breis", "Críoch"];
+  document.getElementById("mock-steps").innerHTML = steps.map((s, i) => `<span class="mstep ${i === mock.step ? "on" : i < mock.step ? "past" : ""}">${s}</span>`).join("");
+  let h = "";
+  if (mock.step === 0){
+    h = `<div class="note"><div class="note-ga">Scrúdú bréige – cleachtadh don scrúdú béil.</div><div class="note-en">A practice run of the four parts in order, with a two-minute clock for each spoken answer. Speak out loud the whole way through. You need your <i>scrúdú ceisteanna</i> sheet for the reading. There’s an optional extra on Ó Grianna at the end.</div></div>` +
+      `<button class="btn primary" id="mk-go">Tosaigh →</button>`;
+  } else if (mock.step === 1){
+    h = `<div class="qcard"><div class="qtop"><span class="badge">Ceist 1 · 10%</span></div><div class="irish-question">Cérbh é Dubhghlas de hÍde?</div>${timerHTML()}${pointsBox("Pointí le lua", C1_POINTS)}</div>`;
+  } else if (mock.step === 2){
+    h = `<div class="qcard"><div class="qtop"><span class="badge">Ceist 2 · 10%</span></div><div class="irish-question">Labhair faoi na téamaí sa léacht ‘An Géarghá le dí-Ghalldú na hÉireann’.</div>${timerHTML()}${pointsBox("Na téamaí", C2_POINTS)}</div>`;
+  } else if (mock.step === 3){
+    h = `<div class="qcard"><div class="qtop"><span class="badge">Ceist 3 · 10%</span></div><div class="irish-question">Léigh Sampla ${mock.sample + 1} as Caisleáin Óir os ard ó do bhileog.</div>` +
+      `<ul class="pts"><li>Go mall agus go soiléir – slowly and clearly</li><li>Watch the séimhiú and urú you marked</li><li>If you slip, correct it and keep going</li><li>Be ready to say what any word means</li></ul>${timerHTML("Cé chomh fada a thógann sé? · time your reading.")}</div>`;
+  } else if (mock.step === 4){
+    const g = MINIU[mock.minGroup];
+    h = `<div class="qcard"><div class="qtop"><span class="badge">Ceist 4 · 10%</span></div><div class="irish-question">Mínigh na habairtí seo ar dhá dhóigh eile i nGaeilge.</div><div class="english-box"><span class="lbl">Sliocht</span><div class="english-text">${g.c}</div></div>` +
+      `<button class="linkbtn" id="mk-swap" style="margin:0 0 0.6rem">Sliocht de hÍde ina áit · use a Hyde passage instead</button></div>` +
+      g.items.map((m, i) => cardHTML(byId["m" + mock.minGroup + "_" + i])).join("");
+  } else if (mock.step === 5){
+    h = `<div class="qcard"><div class="qtop"><span class="badge">Breis · roghnach</span></div><div class="irish-question">Cuir síos ar chúlra an údair – Séamus Ó Grianna.</div><div class="english-box"><span class="lbl">Optional</span><div class="english-text">Only if Art confirms the author of Caisleáin Óir can come up. Skip with ‘Ar aghaidh’ if not.</div></div>${timerHTML()}${pointsBox("Pointí le lua", OG_POINTS)}</div>`;
+  } else {
+    const g = MINIU[mock.minGroup];
+    const okN = g.items.filter((m, i) => prog["m" + mock.minGroup + "_" + i] === "ok").length;
+    h = `<div class="finish"><div class="lbl">Críochnaithe</div><div class="finish-pct">${okN}/5</div><div class="finish-sub">Ceist 4: phrases you marked right (${g.c})</div>` +
+      `<p class="finish-sub" style="margin-top:0">Run it again with a different passage. Every ✗ you marked is waiting in Ceist 4 → Le hathbhreithniú.</p><button class="btn primary" id="mk-again">Arís</button></div>`;
+  }
+  if (mock.step > 0 && mock.step < 6){
+    h += `<div class="mock-nav"><button class="btn" id="mk-back">← Siar</button><button class="btn primary" id="mk-next">Ar aghaidh →</button></div>`;
+  }
+  box.innerHTML = h;
+}
+function mockStart(){
+  mock.sample = Math.floor(Math.random() * 5);   // Caisleáin Óir 1–5
+  mock.minGroup = mock.sample;
+  mock.step = 1; resetTimer(120); renderMock();
+}
+function mockGo(d){ mock.step = Math.max(0, Math.min(6, mock.step + d)); resetTimer(120); renderMock(); window.scrollTo(0, 0); }
+
+// ───────── TABS ─────────
+let cur = "treoir";
+function renderTabs(){
+  document.getElementById("tabs").innerHTML = TABS.map(t => `<button class="tab ${t.id===cur?"active":""}" data-tab="${t.id}">${t.label}</button>`).join("");
+  const a = document.querySelector(".tab.active"); if (a && a.scrollIntoView) try { a.scrollIntoView({inline:"center", block:"nearest"}); } catch (e) {}
+}
+function showTab(id){
+  cur = id; if (id !== "mock") stopTimer();
+  try { history.replaceState(null, "", "#" + id); } catch (e) {}
+  renderTabs();
+  TABS.forEach(t => document.getElementById("p-" + t.id).classList.toggle("active", t.id === id));
+  if (LIST.indexOf(id) >= 0){ renderChips(id); renderList(id); }
+  if (id === "mock") renderMock();
+  if (id === "treoir") refreshCounts();
+  window.scrollTo(0, 0);
+}
+
+// ───────── EVENTS ─────────
+document.addEventListener("click", e => {
+  const t = e.target.closest("button"); if (!t) return;
+  const d = t.dataset;
+  if (d.tab){ showTab(d.tab); return; }
+  if (d.reveal){
+    const a = t.closest(".qcard").querySelector(".answer");
+    const open = !a.classList.toggle("hidden");
+    t.textContent = open ? "Folaigh" : (byId[d.reveal].model ? "Taispeáin an freagra samplach" : "Taispeáin an freagra");
+    return;
+  }
+  if (d.toggle){ const a = document.getElementById(d.toggle); const open = !a.classList.toggle("hidden"); t.textContent = open ? "Folaigh na pointí" : "Taispeáin na pointí"; return; }
+  if (d.mark && d.id){ setMark(d.id, d.mark); return; }
+  if (d.sec && d.cat !== undefined){ state[d.sec].cat = d.cat; renderChips(d.sec); renderList(d.sec); return; }
+  if (d.sec && d.st){ state[d.sec].st = d.st; renderChips(d.sec); renderList(d.sec); return; }
+  switch (t.id){
+    case "mk-go": case "mk-again": mockStart(); return;
+    case "mk-next": mockGo(1); return;
+    case "mk-back": mockGo(-1); return;
+    case "mk-swap": mock.minGroup = 5 + Math.floor(Math.random() * (MINIU.length - 5)); renderMock(); return;
+    case "tm-start":
+      if (mock.timer){ stopTimer(); }
+      else { if (mock.left === 0) mock.left = mock.secs; mock.timer = setInterval(tick, 1000); }
+      renderTimer(); return;
+    case "tm-reset": resetTimer(mock.secs); renderTimer(); return;
+    case "reset-btn":
+      if (t.dataset.confirm !== "1"){ t.dataset.confirm = "1"; t.textContent = "Cinnte? Brúigh arís · press again to confirm"; return; }
+      prog = {}; save(); refreshCounts(); t.dataset.confirm = ""; t.textContent = "Glan an dul chun cinn · Reset progress"; return;
+  }
+});
+
+window.addEventListener("hashchange", () => { const h = (location.hash || "").replace("#", ""); if (h !== cur && TABS.some(t => t.id === h)) showTab(h); });
+refreshCounts();
+const start = (location.hash || "").replace("#", "");
+showTab(TABS.some(t => t.id === start) ? start : "treoir");
+})();
+
+</script>
+</body>
+</html>
